@@ -1,0 +1,1580 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="สร้างพรอมป์วิดีโอสินค้า 10 วินาทีสำหรับ Gemini จากรูปและรายละเอียดสินค้า">
+  <title>Prompt Studio — สร้างพรอมป์วิดีโอสินค้า 10 วินาที</title>
+  <script>
+    (() => {
+      try {
+        const savedTheme = localStorage.getItem('prompt-studio-theme');
+        const theme = savedTheme || 'light';
+        document.documentElement.dataset.theme = theme;
+      } catch (_) {
+        document.documentElement.dataset.theme = 'light';
+      }
+    })();
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+Thai:wght@400;500;600;700;800&display=swap');
+
+    :root {
+      --ink: #17201b;
+      --muted: #657069;
+      --paper: #f5f3ec;
+      --panel: rgba(255, 255, 255, .74);
+      --line: #d8d9d0;
+      --acid: #d8ff58;
+      --acid-dark: #bada42;
+      --plum: #5b345d;
+      --peach: #ffbba1;
+      --danger: #b33b3b;
+      --shadow: 0 18px 50px rgba(30, 38, 32, .09);
+      --radius-lg: 28px;
+      --radius-md: 18px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; color-scheme: light; }
+    html[data-theme="dark"] { color-scheme: dark; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      overflow-x: hidden;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 6% 12%, rgba(216, 255, 88, .35), transparent 24rem),
+        radial-gradient(circle at 94% 85%, rgba(255, 187, 161, .28), transparent 28rem),
+        var(--paper);
+      font-family: "Noto Sans Thai", system-ui, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button, input, textarea, select { font: inherit; }
+    button, select { cursor: pointer; }
+    button, a, input, textarea, select { -webkit-tap-highlight-color: transparent; }
+
+    .shell {
+      width: min(1360px, calc(100% - 48px));
+      margin: 0 auto;
+      padding: clamp(20px, 2.5vw, 32px) 0 max(48px, env(safe-area-inset-bottom));
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 28px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 800;
+      letter-spacing: -.03em;
+    }
+
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--ink);
+      border-radius: 12px;
+      background: var(--acid);
+      box-shadow: 4px 4px 0 var(--ink);
+      transform: rotate(-3deg);
+    }
+
+    .status-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border: 1px solid var(--line);
+      border-radius: 99px;
+      color: var(--muted);
+      background: rgba(255,255,255,.5);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #47a25d;
+      box-shadow: 0 0 0 4px rgba(71,162,93,.12);
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .theme-toggle {
+      width: 38px;
+      height: 38px;
+      flex: 0 0 auto;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      color: var(--ink);
+      background: rgba(255,255,255,.62);
+      box-shadow: 0 5px 16px rgba(23,32,27,.06);
+      transition: border-color .2s, background .2s, transform .2s;
+    }
+
+    .theme-toggle:hover {
+      border-color: var(--ink);
+      background: var(--acid);
+      transform: translateY(-1px);
+    }
+
+    .theme-toggle:focus-visible {
+      outline: 3px solid rgba(216,255,88,.32);
+      outline-offset: 2px;
+    }
+
+    .theme-icon { font-size: 17px; line-height: 1; }
+    .theme-icon-sun { display: none; }
+    [data-theme="dark"] .theme-icon-moon { display: none; }
+    [data-theme="dark"] .theme-icon-sun { display: inline; }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(300px, .8fr);
+      gap: 24px;
+      align-items: end;
+      margin: clamp(38px, 5vw, 64px) 0 clamp(26px, 3vw, 38px);
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 13px;
+      font-family: "DM Mono", monospace;
+      color: var(--plum);
+      font-size: 12px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    h1 {
+      max-width: 850px;
+      margin: 0;
+      font-size: clamp(40px, 6vw, 82px);
+      line-height: .99;
+      letter-spacing: -.065em;
+    }
+
+    .highlight {
+      position: relative;
+      display: inline-block;
+      z-index: 0;
+    }
+
+    .highlight::after {
+      content: "";
+      position: absolute;
+      left: -.03em;
+      right: -.04em;
+      bottom: .04em;
+      height: .32em;
+      z-index: -1;
+      border-radius: 99px 18px 99px 18px;
+      background: var(--acid);
+      transform: rotate(-1deg);
+    }
+
+    .hero-note {
+      max-width: 480px;
+      margin: 0 0 7px auto;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.75;
+    }
+
+    .step-row {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 18px;
+    }
+
+    .mini-step {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .mini-step b {
+      width: 22px;
+      height: 22px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      color: var(--ink);
+      background: white;
+      border: 1px solid var(--line);
+      font-family: "DM Mono", monospace;
+      font-size: 10px;
+    }
+
+    .step-arrow { color: #a4aaa6; }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(380px, .88fr) minmax(460px, 1.12fr);
+      gap: clamp(18px, 2vw, 28px);
+      align-items: start;
+    }
+
+    .card {
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+    }
+
+    .card-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+      padding: 22px 24px 17px;
+      border-bottom: 1px solid rgba(216,217,208,.72);
+    }
+
+    .card-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0;
+      font-size: 16px;
+      letter-spacing: -.02em;
+    }
+
+    .num {
+      width: 28px;
+      height: 28px;
+      display: grid;
+      place-items: center;
+      border-radius: 9px;
+      background: var(--ink);
+      color: white;
+      font-family: "DM Mono", monospace;
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    .card-kicker {
+      color: var(--muted);
+      font-family: "DM Mono", monospace;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    .card-body { padding: clamp(20px, 2vw, 26px); }
+
+    .upload-zone {
+      position: relative;
+      min-height: 250px;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      padding: 24px;
+      border: 1.5px dashed #aab0aa;
+      border-radius: var(--radius-md);
+      background:
+        linear-gradient(135deg, rgba(216,255,88,.12), rgba(255,255,255,.5));
+      text-align: center;
+      transition: border-color .2s, background .2s, transform .2s;
+    }
+
+    .upload-zone:hover, .upload-zone.dragging {
+      border-color: var(--ink);
+      background: rgba(216,255,88,.16);
+    }
+
+    .upload-zone.dragging { transform: scale(.992); }
+
+    .upload-zone.has-image {
+      min-height: 360px;
+      padding: 0;
+      border-style: solid;
+      background: #e9e9e3;
+    }
+
+    .upload-zone input {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .upload-empty { pointer-events: none; }
+
+    .upload-icon {
+      width: 58px;
+      height: 58px;
+      display: grid;
+      place-items: center;
+      margin: 0 auto 15px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: white;
+      box-shadow: 0 8px 20px rgba(30,38,32,.08);
+      font-size: 24px;
+    }
+
+    .upload-empty strong {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 15px;
+    }
+
+    .upload-empty small { color: var(--muted); }
+
+    .preview {
+      width: 100%;
+      height: 100%;
+      min-height: 360px;
+      display: none;
+      object-fit: contain;
+    }
+
+    .upload-zone.has-image .preview { display: block; }
+    .upload-zone.has-image .upload-empty { display: none; }
+
+    .image-actions {
+      position: absolute;
+      right: 14px;
+      bottom: 14px;
+      display: none;
+      gap: 8px;
+    }
+
+    .upload-zone.has-image .image-actions { display: flex; }
+
+    .small-button {
+      border: 1px solid rgba(23,32,27,.15);
+      border-radius: 10px;
+      padding: 8px 11px;
+      color: var(--ink);
+      background: rgba(255,255,255,.9);
+      box-shadow: 0 5px 15px rgba(23,32,27,.1);
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .privacy {
+      display: flex;
+      gap: 8px;
+      margin-top: 11px;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.5;
+    }
+
+    .form-stack { display: grid; gap: 17px; margin-top: 22px; }
+
+    .field { display: grid; gap: 7px; }
+
+    .field-label-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .field label {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      color: #3d4841;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .optional { color: #929992; font-weight: 500; }
+
+    .script-gen {
+      flex: 0 0 auto;
+      min-height: 32px;
+      padding: 0 11px;
+      border: 1px solid var(--ink);
+      border-radius: 10px;
+      color: var(--ink);
+      background: var(--acid);
+      box-shadow: 2px 2px 0 var(--ink);
+      font-size: 10px;
+      font-weight: 800;
+      transition: transform .18s, box-shadow .18s, background .18s;
+    }
+
+    .script-gen:hover { background: #e5ff86; transform: translate(-1px, -1px); box-shadow: 3px 3px 0 var(--ink); }
+    .script-gen:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--ink); }
+
+    .field-hint {
+      margin: 0;
+      color: var(--muted);
+      font-size: 10px;
+      line-height: 1.5;
+    }
+
+    input[type="text"], textarea, select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      outline: none;
+      color: var(--ink);
+      background: rgba(255,255,255,.78);
+      transition: border-color .2s, box-shadow .2s, background .2s;
+    }
+
+    input[type="text"], select {
+      height: 46px;
+      padding: 0 13px;
+    }
+
+    textarea {
+      min-height: 108px;
+      resize: vertical;
+      padding: 12px 13px;
+      line-height: 1.65;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      border-color: #7b8c7f;
+      background: white;
+      box-shadow: 0 0 0 4px rgba(216,255,88,.28);
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .style-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .style-option { position: relative; }
+    .style-option input { position: absolute; opacity: 0; }
+
+    .style-option span {
+      min-height: 70px;
+      display: grid;
+      align-content: center;
+      gap: 3px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: rgba(255,255,255,.6);
+      text-align: center;
+      transition: .2s;
+    }
+
+    .style-option b { font-size: 12px; }
+    .style-option small { color: var(--muted); font-size: 9px; }
+
+    .style-option input:checked + span {
+      border-color: var(--ink);
+      background: var(--acid);
+      box-shadow: 3px 3px 0 var(--ink);
+      transform: translate(-1px, -1px);
+    }
+
+    .style-option input:focus-visible + span {
+      outline: 3px solid rgba(91,52,93,.24);
+      outline-offset: 2px;
+    }
+
+    .generate {
+      width: 100%;
+      min-height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      margin-top: 23px;
+      padding: 0 18px 0 20px;
+      border: 1px solid var(--ink);
+      border-radius: 15px;
+      color: white;
+      background: var(--ink);
+      box-shadow: 5px 5px 0 var(--acid-dark);
+      font-weight: 700;
+      transition: transform .18s, box-shadow .18s;
+    }
+
+    .generate:hover { transform: translate(-1px, -1px); box-shadow: 7px 7px 0 var(--acid-dark); }
+    .generate:active { transform: translate(3px, 3px); box-shadow: 2px 2px 0 var(--acid-dark); }
+    .generate-arrow { font-size: 20px; }
+
+    .output-card { position: sticky; top: 18px; scroll-margin-top: 14px; }
+    .output-card .card-head { background: rgba(23,32,27,.96); color: white; }
+    .output-card .num { color: var(--ink); background: var(--acid); }
+    .output-card .card-kicker { color: #aeb7b1; }
+
+    .prompt-empty {
+      min-height: clamp(440px, 62vh, 585px);
+      display: grid;
+      place-items: center;
+      padding: 40px;
+      text-align: center;
+    }
+
+    .empty-art {
+      width: 210px;
+      height: 165px;
+      position: relative;
+      margin: 0 auto 24px;
+    }
+
+    .film-frame {
+      position: absolute;
+      inset: 5px 16px 28px;
+      display: grid;
+      place-items: center;
+      border: 2px solid var(--ink);
+      border-radius: 20px;
+      background: var(--peach);
+      box-shadow: 10px 10px 0 var(--plum);
+      transform: rotate(2deg);
+      font-size: 40px;
+    }
+
+    .film-frame::before, .film-frame::after {
+      content: "•••••";
+      position: absolute;
+      left: 14px;
+      color: rgba(23,32,27,.72);
+      font-family: "DM Mono", monospace;
+      font-size: 14px;
+      letter-spacing: 10px;
+    }
+
+    .film-frame::before { top: 4px; }
+    .film-frame::after { bottom: 4px; }
+
+    .spark {
+      position: absolute;
+      right: 2px;
+      top: 0;
+      font-size: 27px;
+      transform: rotate(12deg);
+    }
+
+    .prompt-empty h3 { margin: 0 0 7px; font-size: 17px; }
+    .prompt-empty p { max-width: 360px; margin: 0 auto; color: var(--muted); font-size: 13px; line-height: 1.7; }
+
+    .prompt-result { display: none; }
+
+    .result-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 13px;
+    }
+
+    .result-meta {
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 0 9px;
+      border: 1px solid var(--line);
+      border-radius: 99px;
+      color: var(--muted);
+      background: white;
+      font-family: "DM Mono", monospace;
+      font-size: 9px;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+
+    .toolbar-buttons { display: flex; gap: 7px; }
+
+    .icon-btn {
+      width: 36px;
+      height: 36px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: white;
+      color: var(--ink);
+      transition: .2s;
+    }
+
+    .icon-btn:hover { border-color: var(--ink); background: var(--acid); }
+
+    .prompt-box {
+      width: 100%;
+      height: clamp(400px, calc(100vh - 345px), 600px);
+      min-height: 360px;
+      max-height: 65vh;
+      resize: vertical;
+      padding: 20px;
+      border: 1px solid #29332d;
+      border-radius: 17px;
+      outline: none;
+      color: #eaf0eb;
+      background: #17201b;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.03);
+      font-family: "DM Mono", "Noto Sans Thai", monospace;
+      font-size: 12px;
+      line-height: 1.75;
+      scrollbar-color: #68726b #17201b;
+    }
+
+    .prompt-box:focus { box-shadow: 0 0 0 4px rgba(216,255,88,.28); }
+
+    .copy-main {
+      width: 100%;
+      min-height: 54px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 0;
+      border: 1px solid var(--ink);
+      border-radius: 14px;
+      background: var(--acid);
+      color: var(--ink);
+      font-weight: 800;
+      transition: .2s;
+    }
+
+    .copy-main:hover { background: #e3ff82; transform: translateY(-1px); }
+    .copy-main.copied { background: #bfeec5; }
+
+    .open-gemini {
+      width: 100%;
+      min-height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      margin-top: 0;
+      border: 1px solid var(--plum);
+      border-radius: 14px;
+      color: var(--plum);
+      background: rgba(255,255,255,.82);
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 800;
+      transition: background .18s, color .18s, transform .18s;
+    }
+
+    .open-gemini:hover { color: white; background: var(--plum); transform: translateY(-1px); }
+    .open-gemini:focus-visible { outline: 3px solid rgba(91,52,93,.24); outline-offset: 2px; }
+
+    .result-actions {
+      display: grid;
+      grid-template-columns: minmax(0, 1.45fr) minmax(150px, .55fr);
+      gap: 9px;
+      margin-top: 12px;
+    }
+
+    .gemini-tip {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+      padding: 13px;
+      border: 1px solid #ead9b4;
+      border-radius: 13px;
+      color: #655634;
+      background: #fff6df;
+      font-size: 11px;
+      line-height: 1.55;
+    }
+
+    .error {
+      display: none;
+      margin-top: 12px;
+      padding: 10px 12px;
+      border: 1px solid rgba(179,59,59,.25);
+      border-radius: 11px;
+      color: var(--danger);
+      background: rgba(179,59,59,.06);
+      font-size: 11px;
+    }
+
+    .error.show { display: block; }
+
+    .toast {
+      position: fixed;
+      z-index: 10;
+      left: 50%;
+      bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 11px 15px;
+      border: 1px solid rgba(255,255,255,.13);
+      border-radius: 99px;
+      color: white;
+      background: rgba(23,32,27,.94);
+      box-shadow: 0 14px 35px rgba(23,32,27,.24);
+      font-size: 12px;
+      opacity: 0;
+      pointer-events: none;
+      transform: translate(-50%, 16px);
+      transition: .25s;
+    }
+
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+    footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      margin-top: 24px;
+      padding: 16px 4px 0;
+      color: var(--muted);
+      font-size: 10px;
+    }
+
+    html[data-theme="dark"] {
+      --ink: #edf3ee;
+      --muted: #a9b4ac;
+      --paper: #101512;
+      --panel: rgba(25, 32, 28, .88);
+      --line: #3a453e;
+      --acid: #cbed57;
+      --acid-dark: #91aa35;
+      --plum: #d8adda;
+      --peach: #b46f58;
+      --danger: #ff9696;
+      --shadow: 0 20px 58px rgba(0, 0, 0, .3);
+    }
+
+    html[data-theme="dark"] body {
+      background:
+        radial-gradient(circle at 6% 12%, rgba(175, 216, 61, .14), transparent 24rem),
+        radial-gradient(circle at 94% 85%, rgba(180, 111, 88, .13), transparent 28rem),
+        var(--paper);
+    }
+
+    html[data-theme="dark"] .status-pill,
+    html[data-theme="dark"] .theme-toggle,
+    html[data-theme="dark"] input[type="text"],
+    html[data-theme="dark"] textarea,
+    html[data-theme="dark"] select,
+    html[data-theme="dark"] .style-option span,
+    html[data-theme="dark"] .open-gemini {
+      background: rgba(31, 40, 35, .9);
+    }
+
+    html[data-theme="dark"] .theme-toggle:hover,
+    html[data-theme="dark"] .style-option input:checked + span {
+      color: #17201b;
+      background: var(--acid);
+    }
+
+    html[data-theme="dark"] .mini-step b,
+    html[data-theme="dark"] .upload-icon,
+    html[data-theme="dark"] .small-button,
+    html[data-theme="dark"] .tag,
+    html[data-theme="dark"] .icon-btn {
+      color: var(--ink);
+      background: #252e29;
+    }
+
+    html[data-theme="dark"] .field label { color: #d3ddd5; }
+    html[data-theme="dark"] .optional { color: #89958c; }
+
+    html[data-theme="dark"] input:focus,
+    html[data-theme="dark"] textarea:focus,
+    html[data-theme="dark"] select:focus {
+      border-color: #8d9c92;
+      background: #202923;
+    }
+
+    html[data-theme="dark"] .upload-zone {
+      border-color: #657168;
+      background: linear-gradient(135deg, rgba(203,237,87,.08), rgba(31,40,35,.62));
+    }
+
+    html[data-theme="dark"] .upload-zone.has-image { background: #1b221e; }
+    html[data-theme="dark"] .output-card .card-head { background: #090d0b; }
+    html[data-theme="dark"] .prompt-box { border-color: #4a574f; background: #090d0b; }
+
+    html[data-theme="dark"] .gemini-tip {
+      border-color: #665936;
+      color: #dfce9e;
+      background: #292515;
+    }
+
+    html[data-theme="dark"] .film-frame { color: #17201b; }
+    html[data-theme="dark"] .copy-main { color: #17201b; }
+    html[data-theme="dark"] .open-gemini { color: var(--plum); }
+    html[data-theme="dark"] .open-gemini:hover { color: #17201b; background: var(--plum); }
+
+    @media (max-width: 1080px) {
+      .workspace { grid-template-columns: 1fr; }
+      .output-card { position: static; }
+      .prompt-empty { min-height: 410px; }
+      .prompt-box { height: 520px; max-height: none; }
+    }
+
+    @media (max-width: 900px) {
+      .hero { grid-template-columns: 1fr; margin-top: 34px; }
+      .hero-note { margin-left: 0; }
+    }
+
+    @media (max-width: 720px) {
+      .shell { width: calc(100% - 20px); padding-top: 14px; padding-bottom: max(34px, env(safe-area-inset-bottom)); }
+      .topbar { gap: 12px; margin-bottom: 14px; }
+      .brand-copy { display: none; }
+      .status-pill { padding: 7px 10px; font-size: 10px; }
+      .topbar-actions { gap: 7px; }
+      .theme-toggle { width: 36px; height: 36px; }
+      .hero { margin: 25px 0 22px; gap: 18px; }
+      .eyebrow { margin-bottom: 9px; font-size: 10px; }
+      h1 { font-size: clamp(39px, 12.5vw, 58px); line-height: 1.02; }
+      .hero-note { font-size: 13px; line-height: 1.68; }
+      .step-row { gap: 6px; margin-top: 14px; }
+      .mini-step { gap: 5px; font-size: 10px; }
+      .mini-step b { width: 20px; height: 20px; font-size: 9px; }
+      .step-arrow { font-size: 11px; }
+      .workspace { gap: 14px; }
+      .card { border-radius: 20px; box-shadow: 0 12px 34px rgba(30,38,32,.075); }
+      .card-head { padding: 15px 16px 13px; }
+      .card-body { padding: 16px; }
+      .card-title { font-size: 14px; }
+      .num { width: 26px; height: 26px; }
+      .card-kicker { display: none; }
+      .upload-zone { min-height: 205px; padding: 18px; }
+      .upload-icon { width: 52px; height: 52px; margin-bottom: 12px; }
+      .upload-empty strong { font-size: 13px; }
+      .upload-empty small { font-size: 10px; }
+      .upload-zone.has-image, .preview { min-height: 260px; max-height: 390px; }
+      .privacy { font-size: 10px; }
+      .form-stack { gap: 15px; margin-top: 18px; }
+      .two-col { grid-template-columns: 1fr; }
+      .style-grid { grid-template-columns: 1fr 1fr; }
+      .style-option span { min-height: 62px; padding: 8px; }
+      input[type="text"], select { height: 50px; padding-left: 12px; padding-right: 12px; font-size: 16px; }
+      textarea { min-height: 118px; font-size: 16px; }
+      .generate { min-height: 58px; margin-top: 19px; }
+      .prompt-empty { min-height: 330px; padding: 28px 20px; }
+      .empty-art { width: 175px; height: 140px; margin-bottom: 18px; transform: scale(.9); }
+      .result-toolbar { align-items: flex-start; }
+      .result-meta { gap: 5px; }
+      .tag { min-height: 26px; padding: 0 8px; font-size: 8px; }
+      .prompt-box { height: 54vh; min-height: 390px; max-height: 540px; padding: 15px; font-size: 13px; line-height: 1.7; }
+      .result-actions { grid-template-columns: 1fr; }
+      .copy-main, .open-gemini { min-height: 52px; }
+      .gemini-tip { font-size: 10px; }
+      .toast { width: calc(100% - 28px); justify-content: center; bottom: max(16px, env(safe-area-inset-bottom)); text-align: center; }
+      footer { flex-direction: column; gap: 6px; }
+    }
+
+    @media (max-width: 380px) {
+      .status-pill { max-width: 205px; overflow: hidden; text-overflow: ellipsis; }
+      h1 { font-size: 38px; }
+      .card-head, .card-body { padding-left: 14px; padding-right: 14px; }
+      .field-label-row { align-items: flex-start; }
+      .script-gen { max-width: 132px; line-height: 1.25; }
+      .prompt-box { min-height: 360px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">✦</div>
+        <span class="brand-copy">Prompt Studio</span>
+      </div>
+      <div class="topbar-actions">
+        <div class="status-pill"><span class="status-dot"></span>พร้อมสร้างพรอมป์ • Gemini / Veo</div>
+        <button id="themeToggle" class="theme-toggle" type="button" aria-label="เปลี่ยนเป็นโหมดมืด" title="เปลี่ยนเป็นโหมดมืด">
+          <span class="theme-icon theme-icon-moon" aria-hidden="true">☾</span>
+          <span class="theme-icon theme-icon-sun" aria-hidden="true">☀</span>
+        </button>
+      </div>
+    </header>
+
+    <section class="hero">
+      <div>
+        <div class="eyebrow">Product video prompt maker <span>↗</span></div>
+        <h1>เปลี่ยนรูปสินค้า<br>เป็นวิดีโอ <span class="highlight">10 วินาที</span></h1>
+      </div>
+      <div>
+        <p class="hero-note">สร้างวิดีโอรีวิว 3–5 ฉาก พร้อมผู้รีวิวชายหรือหญิงและเสียงพากย์ภาษาไทย ระบบจะเรียบเรียงลำดับฉาก การเคลื่อนกล้อง แสง และข้อห้ามให้พร้อมใช้ใน Gemini</p>
+        <div class="step-row" aria-label="ขั้นตอนใช้งาน">
+          <span class="mini-step"><b>01</b> แนบรูป</span><span class="step-arrow">→</span>
+          <span class="mini-step"><b>02</b> ใส่รายละเอียด</span><span class="step-arrow">→</span>
+          <span class="mini-step"><b>03</b> Copy prompt</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="workspace">
+      <article class="card input-card">
+        <div class="card-head">
+          <h2 class="card-title"><span class="num">01</span> ข้อมูลสินค้า</h2>
+          <span class="card-kicker">Input</span>
+        </div>
+        <div class="card-body">
+          <div id="uploadZone" class="upload-zone" role="button" tabindex="0" aria-label="อัปโหลดรูปสินค้า">
+            <input id="imageInput" type="file" accept="image/png,image/jpeg,image/webp" aria-label="เลือกรูปสินค้า">
+            <div class="upload-empty">
+              <div class="upload-icon" aria-hidden="true">↥</div>
+              <strong>ลากรูปมาวาง หรือคลิกเพื่อเลือก</strong>
+              <small>รองรับ JPG, PNG, WEBP • ไม่เกิน 10 MB</small>
+            </div>
+            <img id="preview" class="preview" alt="รูปสินค้าที่อัปโหลด">
+            <div class="image-actions">
+              <button id="changeImage" class="small-button" type="button">เปลี่ยนรูป</button>
+              <button id="removeImage" class="small-button" type="button">ลบ</button>
+            </div>
+          </div>
+          <div class="privacy"><span aria-hidden="true">⌁</span><span>รูปใช้เพื่อแสดงตัวอย่างในเบราว์เซอร์เท่านั้น ไม่มีการอัปโหลดออกจากเครื่อง</span></div>
+
+          <form id="promptForm" class="form-stack" novalidate>
+            <div class="field">
+              <label for="productName">ชื่อสินค้า <span>จำเป็น</span></label>
+              <input id="productName" type="text" placeholder="เช่น เซรั่มวิตามินซี Glow Drop" maxlength="100" required>
+            </div>
+
+            <div class="field">
+              <label for="productDetails">รายละเอียดสินค้า <span>จำเป็น</span></label>
+              <textarea id="productDetails" placeholder="เช่น ขวดแก้วสีชา เนื้อเซรั่มใส ช่วยให้ผิวดูโกลว์ จุดเด่นคือซึมไว ไม่เหนียว เหมาะกับคนผิวหมองคล้ำ" maxlength="900" required></textarea>
+            </div>
+
+            <div class="field">
+              <label for="sellingPoint">ข้อความที่อยากเน้น <span class="optional">ไม่บังคับ</span></label>
+              <input id="sellingPoint" type="text" placeholder="เช่น ผิวโกลว์ในทุกเช้า / โปรวันนี้เท่านั้น" maxlength="160">
+            </div>
+
+            <div class="two-col">
+              <div class="field">
+                <label for="reviewer">ผู้รีวิว</label>
+                <select id="reviewer">
+                  <option value="woman" selected>ผู้หญิง</option>
+                  <option value="man">ผู้ชาย</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="sceneCount">จำนวนฉาก</label>
+                <select id="sceneCount">
+                  <option value="3">3 ฉาก — กระชับ</option>
+                  <option value="4">4 ฉาก — แนะนำ</option>
+                  <option value="5" selected>5 ฉาก — รายละเอียดครบ</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="field">
+              <div class="field-label-row">
+                <label for="voiceScript">สคริปต์เสียงพากย์ <span class="optional">แก้ไขได้</span></label>
+                <button id="generateVoiceBtn" class="script-gen" type="button">✦ Gen สคริปต์พากย์</button>
+              </div>
+              <textarea id="voiceScript" aria-describedby="voiceHint" placeholder="กด Gen สคริปต์พากย์ เพื่อเรียบเรียงจากข้อมูลสินค้าด้านบน หรือพิมพ์เองได้" maxlength="320"></textarea>
+              <p id="voiceHint" class="field-hint">กดซ้ำเพื่อเปลี่ยนสำนวน • ระบบจะเขียนให้สั้นเหมาะกับวิดีโอ 10 วินาที</p>
+            </div>
+
+            <div class="gemini-tip"><span aria-hidden="true">✦</span><span><strong>ภาพรวมที่ล็อกไว้:</strong> ครีม–เบจ อบอุ่น, แสงธรรมชาติ, Korean minimal aesthetic, cozy luxury, shallow depth of field และภาพโฆษณาสมจริงคมชัดระดับ 8K</span></div>
+
+            <div class="field">
+              <label>จังหวะการนำเสนอ <span class="optional">ใช้ร่วมกับโทนหลักด้านบน</span></label>
+              <div class="style-grid">
+                <label class="style-option">
+                  <input type="radio" name="style" value="premium">
+                  <span><b>✦ พรีเมียม</b><small>Luxury studio</small></span>
+                </label>
+                <label class="style-option">
+                  <input type="radio" name="style" value="viral">
+                  <span><b>⚡ ไวรัล</b><small>Fast & punchy</small></span>
+                </label>
+                <label class="style-option">
+                  <input type="radio" name="style" value="minimal">
+                  <span><b>◯ มินิมอล</b><small>Clean & soft</small></span>
+                </label>
+                <label class="style-option">
+                  <input type="radio" name="style" value="lifestyle" checked>
+                  <span><b>☀ ไลฟ์สไตล์</b><small>Natural scene</small></span>
+                </label>
+                <label class="style-option">
+                  <input type="radio" name="style" value="beauty">
+                  <span><b>❋ บิวตี้</b><small>Glow & macro</small></span>
+                </label>
+                <label class="style-option">
+                  <input type="radio" name="style" value="cinematic">
+                  <span><b>▶ ซีนีมาติก</b><small>Dramatic film</small></span>
+                </label>
+              </div>
+            </div>
+
+            <div class="two-col">
+              <div class="field">
+                <label for="ratio">สัดส่วนวิดีโอ</label>
+                <select id="ratio">
+                  <option value="9:16" selected>9:16 — TikTok / Reels</option>
+                  <option value="16:9">16:9 — YouTube</option>
+                  <option value="1:1">1:1 — โพสต์ทั่วไป</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="language">ภาษาพรอมป์</label>
+                <select id="language">
+                  <option value="en">English</option>
+                  <option value="th" selected>ภาษาไทย — ค่าเริ่มต้น</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="two-col">
+              <div class="field">
+                <label for="camera">จังหวะกล้อง</label>
+                <select id="camera">
+                  <option value="smooth" selected>นุ่มนวล ลื่นไหล</option>
+                  <option value="dynamic">รวดเร็ว มีพลัง</option>
+                  <option value="macro">มาโคร เน้นรายละเอียด</option>
+                  <option value="static">นิ่ง เรียบหรู</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="textMode">ตัวอักษรในวิดีโอ</label>
+                <select id="textMode">
+                  <option value="none" selected>ไม่มี — ลดข้อความเพี้ยน</option>
+                  <option value="headline">มีเฉพาะข้อความที่เน้น</option>
+                </select>
+              </div>
+            </div>
+
+            <div id="formError" class="error" role="alert"></div>
+
+            <button class="generate" type="submit">
+              <span>สร้าง Prompt 10 วินาที</span><span class="generate-arrow" aria-hidden="true">↗</span>
+            </button>
+          </form>
+        </div>
+      </article>
+
+      <article id="outputCard" class="card output-card">
+        <div class="card-head">
+          <h2 class="card-title"><span class="num">02</span> Prompt พร้อมใช้</h2>
+          <span class="card-kicker">Output</span>
+        </div>
+
+        <div id="promptEmpty" class="prompt-empty">
+          <div>
+            <div class="empty-art" aria-hidden="true">
+              <div class="film-frame">▶</div>
+              <div class="spark">✦</div>
+            </div>
+            <h3>พรอมป์ของคุณจะแสดงตรงนี้</h3>
+            <p>กรอกข้อมูลด้านซ้ายแล้วกดสร้าง ระบบจะจัดฉากครบ 0–10 วินาทีให้พร้อมคัดลอก</p>
+          </div>
+        </div>
+
+        <div id="promptResult" class="card-body prompt-result">
+          <div class="result-toolbar">
+            <div class="result-meta">
+              <span id="ratioTag" class="tag">9:16</span>
+              <span class="tag">10 sec</span>
+              <span id="sceneTag" class="tag">4 scenes</span>
+              <span class="tag">Thai voice</span>
+              <span id="langTag" class="tag">English</span>
+            </div>
+            <div class="toolbar-buttons">
+              <button id="regenerateBtn" class="icon-btn" type="button" title="สร้างเวอร์ชันใหม่" aria-label="สร้างพรอมป์เวอร์ชันใหม่">↻</button>
+              <button id="clearBtn" class="icon-btn" type="button" title="ล้างข้อมูลทั้งหมด" aria-label="ล้างข้อมูลทั้งหมด">×</button>
+            </div>
+          </div>
+          <textarea id="promptOutput" class="prompt-box" aria-label="พรอมป์ที่สร้างแล้ว" spellcheck="false"></textarea>
+          <div class="result-actions">
+            <button id="copyBtn" class="copy-main" type="button"><span aria-hidden="true">▣</span><span id="copyLabel">คัดลอก Prompt ไปใช้ใน Gemini</span></button>
+            <a class="open-gemini" href="https://gemini.google.com/app" target="_blank" rel="noopener noreferrer"><span>เปิด Gemini</span><span aria-hidden="true">↗</span></a>
+          </div>
+          <div class="gemini-tip"><span aria-hidden="true">☝</span><span><strong>วิธีใช้:</strong> เปิด Gemini → เลือก Create video → Add image → แนบรูปสินค้าเดิม → วาง Prompt → ส่งสร้างวิดีโอ</span></div>
+        </div>
+      </article>
+    </section>
+
+    <footer>
+      <span>Prompt Studio • Local browser tool</span>
+      <span>คำแนะนำ: ผลลัพธ์ AI อาจแตกต่างกัน ควรตรวจความถูกต้องของสินค้าและข้อความก่อนเผยแพร่</span>
+    </footer>
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"><span>✓</span><span id="toastText">คัดลอกแล้ว</span></div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const themeToggle = $('themeToggle');
+
+    function updateThemeToggle(theme) {
+      const nextThemeName = theme === 'dark' ? 'โหมดสว่าง' : 'โหมดมืด';
+      themeToggle.setAttribute('aria-label', `เปลี่ยนเป็น${nextThemeName}`);
+      themeToggle.title = `เปลี่ยนเป็น${nextThemeName}`;
+      themeToggle.setAttribute('aria-pressed', String(theme === 'dark'));
+    }
+
+    updateThemeToggle(document.documentElement.dataset.theme || 'light');
+
+    themeToggle.addEventListener('click', () => {
+      const theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+      document.documentElement.dataset.theme = theme;
+      updateThemeToggle(theme);
+      try { localStorage.setItem('prompt-studio-theme', theme); } catch (_) {}
+    });
+
+    const uploadZone = $('uploadZone');
+    const imageInput = $('imageInput');
+    const preview = $('preview');
+    const form = $('promptForm');
+    const errorBox = $('formError');
+    const promptEmpty = $('promptEmpty');
+    const promptResult = $('promptResult');
+    const promptOutput = $('promptOutput');
+    let imageName = '';
+    let variation = 0;
+    let voiceVariation = 0;
+    let toastTimer;
+
+    const styleData = {
+      premium: {
+        en: 'premium luxury product commercial, sophisticated editorial art direction, refined and aspirational',
+        th: 'โฆษณาสินค้าพรีเมียมแบบลักชูรี งานภาพเอดิทอเรียลที่ประณีตและน่าปรารถนา',
+        lightEn: 'controlled studio lighting, soft sculpted highlights, deep elegant shadows',
+        lightTh: 'แสงสตูดิโอที่ควบคุมอย่างประณีต ไฮไลต์นุ่ม และเงาลึกหรูหรา'
+      },
+      viral: {
+        en: 'high-energy social commerce ad, bold visual hook, punchy modern pacing, instantly scroll-stopping',
+        th: 'โฆษณาโซเชียลคอมเมิร์ซพลังสูง เปิดด้วยภาพสะดุดตา จังหวะทันสมัยและหยุดนิ้วได้ทันที',
+        lightEn: 'bright high-contrast lighting, crisp highlights, vivid but accurate color',
+        lightTh: 'แสงสว่างคอนทราสต์สูง ไฮไลต์คม สีสดแต่ยังตรงกับสินค้าจริง'
+      },
+      minimal: {
+        en: 'clean minimalist product film, calm composition, abundant negative space, quiet confidence',
+        th: 'วิดีโอสินค้ามินิมอลสะอาดตา องค์ประกอบสงบ มีพื้นที่ว่างอย่างพอดีและดูมั่นใจ',
+        lightEn: 'soft diffused daylight, gentle shadows, neutral warm-white backdrop',
+        lightTh: 'แสงธรรมชาตินุ่มแบบกระจาย เงาบาง ฉากหลังขาวนวลโทนอุ่น'
+      },
+      lifestyle: {
+        en: 'authentic aspirational lifestyle commercial, warm human atmosphere, natural environment, relatable and tactile',
+        th: 'โฆษณาไลฟ์สไตล์ที่จริงใจและน่าปรารถนา บรรยากาศอบอุ่น เป็นธรรมชาติ และสัมผัสได้',
+        lightEn: 'warm natural window light, realistic soft shadows, organic color palette',
+        lightTh: 'แสงหน้าต่างธรรมชาติโทนอุ่น เงานุ่มสมจริง และชุดสีออร์แกนิก'
+      },
+      beauty: {
+        en: 'high-end beauty campaign, luminous glossy finish, sensorial macro details, fresh and immaculate',
+        th: 'แคมเปญบิวตี้ระดับไฮเอนด์ ผิวสัมผัสฉ่ำวาว รายละเอียดมาโครที่ชวนสัมผัส สดใหม่และเนี้ยบ',
+        lightEn: 'luminous beauty lighting, pearlescent reflections, soft glow with precise product detail',
+        lightTh: 'แสงบิวตี้เปล่งประกาย เงาสะท้อนมุก โกลว์นุ่มแต่รายละเอียดสินค้าคมชัด'
+      },
+      cinematic: {
+        en: 'cinematic hero film, dramatic reveal, rich atmosphere, premium filmic contrast and controlled tension',
+        th: 'หนังฮีโร่ช็อตแบบซีนีมาติก เปิดตัวอย่างดรามาติก บรรยากาศเข้มข้น คอนทราสต์แบบภาพยนตร์',
+        lightEn: 'dramatic directional lighting, volumetric atmosphere, rich blacks and precise highlights',
+        lightTh: 'แสงส่องเฉียงแบบดรามาติก บรรยากาศมีมิติ เงาดำเข้มและไฮไลต์แม่นยำ'
+      }
+    };
+
+    const cameraData = {
+      smooth: {
+        en: ['a slow controlled push-in', 'a smooth 30-degree orbit', 'a graceful pull-back hero reveal'],
+        th: ['ค่อย ๆ ดอลลี่เข้าอย่างนุ่มนวล', 'ออร์บิตรอบสินค้า 30 องศาอย่างลื่นไหล', 'ค่อย ๆ ถอยกล้องเพื่อเผยฮีโร่ช็อต']
+      },
+      dynamic: {
+        en: ['a fast macro snap-in with a speed ramp', 'a dynamic arc move with one clean match cut', 'a punchy pull-back into the final hero frame'],
+        th: ['ซูมเข้ามาโครอย่างรวดเร็วพร้อมสปีดแรมป์', 'เคลื่อนกล้องเป็นเส้นโค้งพร้อมแมตช์คัตหนึ่งครั้ง', 'ถอยกล้องอย่างมีพลังเข้าสู่ฮีโร่เฟรมสุดท้าย']
+      },
+      macro: {
+        en: ['an extreme macro glide across the signature detail', 'a shallow-depth-of-field lateral macro move', 'a slow rack focus into the complete product hero shot'],
+        th: ['ไล่กล้องเอ็กซ์ตรีมมาโครผ่านรายละเอียดสำคัญ', 'เลื่อนกล้องมาโครด้านข้างด้วยระยะชัดตื้น', 'แร็กโฟกัสช้า ๆ ไปยังฮีโร่ช็อตเต็มสินค้า']
+      },
+      static: {
+        en: ['a nearly locked-off symmetrical frame with subtle parallax', 'a precise minimal slider move', 'a composed static hero frame with only ambient motion'],
+        th: ['เฟรมสมมาตรเกือบนิ่งพร้อมพารัลแลกซ์เล็กน้อย', 'สไลด์กล้องสั้น ๆ อย่างแม่นยำ', 'ฮีโร่เฟรมนิ่งที่มีเพียงการเคลื่อนไหวของบรรยากาศ']
+      }
+    };
+
+    const transitionsEn = [
+      'Use a seamless motivated transition through a foreground reflection.',
+      'Use one elegant match cut based on the product silhouette.',
+      'Use a brief light sweep as the transition; keep it physically plausible.'
+    ];
+    const transitionsTh = [
+      'เปลี่ยนฉากอย่างแนบเนียนผ่านเงาสะท้อนด้านหน้า',
+      'ใช้แมตช์คัตหนึ่งครั้งโดยอิงจากรูปทรงของสินค้า',
+      'ใช้แสงกวาดสั้น ๆ เป็นทรานซิชัน โดยยังดูสมจริงตามหลักกายภาพ'
+    ];
+
+    function showToast(message) {
+      $('toastText').textContent = message;
+      $('toast').classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => $('toast').classList.remove('show'), 2200);
+    }
+
+    function openPicker() { imageInput.click(); }
+
+    uploadZone.addEventListener('click', (event) => {
+      if (!event.target.closest('button')) openPicker();
+    });
+    uploadZone.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        openPicker();
+      }
+    });
+    $('changeImage').addEventListener('click', (event) => { event.stopPropagation(); openPicker(); });
+    $('removeImage').addEventListener('click', (event) => { event.stopPropagation(); removeImage(); });
+
+    ['dragenter', 'dragover'].forEach((name) => uploadZone.addEventListener(name, (event) => {
+      event.preventDefault();
+      uploadZone.classList.add('dragging');
+    }));
+    ['dragleave', 'drop'].forEach((name) => uploadZone.addEventListener(name, (event) => {
+      event.preventDefault();
+      uploadZone.classList.remove('dragging');
+    }));
+    uploadZone.addEventListener('drop', (event) => {
+      const file = event.dataTransfer.files[0];
+      if (file) handleImage(file);
+    });
+    imageInput.addEventListener('change', () => {
+      if (imageInput.files[0]) handleImage(imageInput.files[0]);
+    });
+
+    function handleImage(file) {
+      errorBox.classList.remove('show');
+      if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+        return showError('กรุณาเลือกไฟล์ JPG, PNG หรือ WEBP เท่านั้น');
+      }
+      if (file.size > 10 * 1024 * 1024) {
+        return showError('รูปมีขนาดเกิน 10 MB กรุณาเลือกรูปที่เล็กลง');
+      }
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        preview.src = event.target.result;
+        imageName = file.name;
+        uploadZone.classList.add('has-image');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function removeImage() {
+      preview.removeAttribute('src');
+      imageInput.value = '';
+      imageName = '';
+      uploadZone.classList.remove('has-image');
+    }
+
+    function showError(message) {
+      errorBox.textContent = message;
+      errorBox.classList.add('show');
+    }
+
+    function formValues() {
+      return {
+        name: $('productName').value.trim(),
+        details: $('productDetails').value.trim(),
+        selling: $('sellingPoint').value.trim(),
+        reviewer: $('reviewer').value,
+        sceneCount: Number($('sceneCount').value),
+        voiceScript: $('voiceScript').value.trim(),
+        style: document.querySelector('input[name="style"]:checked').value,
+        ratio: $('ratio').value,
+        language: $('language').value,
+        camera: $('camera').value,
+        textMode: $('textMode').value
+      };
+    }
+
+    function compactSpeechSource(text, maxWords, maxChars) {
+      const clean = text
+        .replace(/[•▪◦|]+/g, ', ')
+        .replace(/\s+/g, ' ')
+        .replace(/^[,;:.\s]+|[,;:.\s]+$/g, '')
+        .trim();
+      if (!clean) return '';
+
+      try {
+        const segments = new Intl.Segmenter('th', { granularity: 'word' }).segment(clean);
+        let result = '';
+        let wordCount = 0;
+        for (const segment of segments) {
+          if (segment.isWordLike && wordCount >= maxWords) break;
+          if (result.length + segment.segment.length > maxChars) break;
+          result += segment.segment;
+          if (segment.isWordLike) wordCount += 1;
+        }
+        return result.replace(/[,;:.\s]+$/g, '').trim();
+      } catch (_) {
+        return clean.slice(0, maxChars).replace(/[,;:.\s]+$/g, '').trim();
+      }
+    }
+
+    function generateVoiceScript() {
+      const name = $('productName').value.trim();
+      const details = $('productDetails').value.trim();
+      const selling = $('sellingPoint').value.trim();
+
+      if (!name || !details) {
+        showError(`กรุณาใส่${!name ? 'ชื่อสินค้า' : 'รายละเอียดสินค้า'}ก่อน Gen สคริปต์พากย์`);
+        (!name ? $('productName') : $('productDetails')).focus();
+        return;
+      }
+
+      const particle = $('reviewer').value === 'woman' ? 'ค่ะ' : 'ครับ';
+      const shortName = compactSpeechSource(name, 5, 55);
+      const shortDetails = compactSpeechSource(details, 13, 125);
+      const shortSelling = compactSpeechSource(selling, 7, 70);
+      const emphasis = shortSelling ? ` จุดเด่นที่อยากเน้นคือ ${shortSelling}` : '';
+      const scripts = [
+        `วันนี้ขอแนะนำ ${shortName} ${shortDetails}${emphasis} น่าสนใจมาก${particle}`,
+        `มาทำความรู้จัก ${shortName} กัน${particle} ${shortDetails}${shortSelling ? ` และสิ่งที่อยากบอกคือ ${shortSelling}` : ''}`,
+        `${shortName} ${shortDetails}${shortSelling ? ` พร้อมจุดเด่น ${shortSelling}` : ''} ใครกำลังมองหาสินค้าแบบนี้ ลองพิจารณาดูนะ${particle}`
+      ];
+
+      const script = scripts[voiceVariation % scripts.length]
+        .replace(/\s+/g, ' ')
+        .replace(/\s+([,.;])/g, '$1')
+        .trim();
+      voiceVariation += 1;
+      $('voiceScript').value = script.slice(0, 320);
+      $('voiceScript').focus();
+      $('voiceScript').setSelectionRange($('voiceScript').value.length, $('voiceScript').value.length);
+      errorBox.classList.remove('show');
+      showToast('สร้างสคริปต์พากย์แล้ว • กดซ้ำเพื่อเปลี่ยนสำนวน');
+    }
+
+    $('generateVoiceBtn').addEventListener('click', generateVoiceScript);
+
+    function englishShotPlan(v, moves, transition) {
+      const plans = {
+        3: `• SCENE 1 — 0.0–2.5s — HOOK & INTRO: Start immediately on a striking macro product detail using ${moves[0]}, then reveal the reviewer in the same warm cream-beige setting. No fade from black. Begin the Thai voice naturally by 0.3s.\n• SCENE 2 — 2.5–7.0s — REVIEW & DEMONSTRATION: The reviewer holds, presents, or naturally demonstrates the product while the voice explains its main details and benefit. Use ${moves[1]}. Include one precise product beauty insert. ${transition}\n• SCENE 3 — 7.0–10.0s — RECOMMENDATION & HERO: The same reviewer gives a warm, confident recommendation, then use ${moves[2]}. Finish on a clean hero frame with the product centered, fully visible, and sharp.`,
+        4: `• SCENE 1 — 0.0–1.8s — VISUAL HOOK: Start immediately with a premium macro detail of the real product using ${moves[0]}. No fade from black. Begin the Thai voice naturally by 0.3s.\n• SCENE 2 — 1.8–4.3s — REVIEWER INTRO: Reveal the reviewer in a warm Korean-minimal cream-beige interior, naturally holding the product and introducing its name. Preserve realistic hands and product scale.\n• SCENE 3 — 4.3–7.4s — DETAIL & BENEFIT: Show a natural demonstration plus one commercial beauty insert while the reviewer explains the key product details. Use ${moves[1]}. ${transition}\n• SCENE 4 — 7.4–10.0s — RECOMMENDATION & HERO: The same reviewer delivers the key recommendation, then use ${moves[2]}. End with the product fully visible in a clean premium hero composition.`,
+        5: `• SCENE 1 — 0.0–1.5s — STOP-SCROLL HOOK: Open instantly on a striking macro product detail using ${moves[0]}. No fade from black. Begin the Thai voice naturally by 0.3s.\n• SCENE 2 — 1.5–3.2s — REVIEWER INTRO: Reveal the reviewer in the warm cream-beige Korean-minimal setting, naturally holding the product and saying its name.\n• SCENE 3 — 3.2–5.2s — PRODUCT DEMO: Show a simple, physically correct use or presentation of the product. Keep the reviewer, wardrobe, hands, and product completely consistent.\n• SCENE 4 — 5.2–7.6s — BENEFIT DETAIL: Use ${moves[1]} and one crisp commercial beauty insert to visualize only the supplied product details. ${transition}\n• SCENE 5 — 7.6–10.0s — RECOMMENDATION & HERO: The same reviewer gives a warm recommendation, then use ${moves[2]}. End with a clean product hero shot, centered, fully visible, sharp, and unobstructed.`
+      };
+      return plans[v.sceneCount];
+    }
+
+    function thaiShotPlan(v, moves, transition) {
+      const plans = {
+        3: `• ฉาก 1 — 0.0–2.5 วินาที — HOOK & INTRO: เปิดทันทีด้วยรายละเอียดมาโครที่โดดเด่นของสินค้าจริงโดย ${moves[0]} แล้วเผยผู้รีวิวในฉากครีม–เบจอบอุ่นเดียวกัน ห้ามเฟดจากจอดำ เริ่มเสียงพูดไทยอย่างเป็นธรรมชาติภายใน 0.3 วินาที\n• ฉาก 2 — 2.5–7.0 วินาที — REVIEW & DEMONSTRATION: ผู้รีวิวถือ นำเสนอ หรือสาธิตสินค้าอย่างเป็นธรรมชาติ พร้อมเล่ารายละเอียดและประโยชน์หลัก ${moves[1]} แทรกบิวตี้ช็อตสินค้าคมชัดหนึ่งช็อต ${transition}\n• ฉาก 3 — 7.0–10.0 วินาที — RECOMMENDATION & HERO: ผู้รีวิวคนเดิมแนะนำสินค้าอย่างอบอุ่นและมั่นใจ แล้ว ${moves[2]} จบด้วยฮีโร่เฟรมสะอาด สินค้าอยู่กลางเฟรม เห็นครบและคมชัด`,
+        4: `• ฉาก 1 — 0.0–1.8 วินาที — VISUAL HOOK: เปิดทันทีด้วยรายละเอียดมาโครพรีเมียมของสินค้าจริงโดย ${moves[0]} ห้ามเฟดจากจอดำ เริ่มเสียงพูดไทยอย่างเป็นธรรมชาติภายใน 0.3 วินาที\n• ฉาก 2 — 1.8–4.3 วินาที — REVIEWER INTRO: เผยผู้รีวิวในอินทีเรียร์ Korean minimal โทนครีม–เบจอบอุ่น ถือสินค้าอย่างเป็นธรรมชาติและแนะนำชื่อสินค้า รักษามือและสัดส่วนสินค้าให้สมจริง\n• ฉาก 3 — 4.3–7.4 วินาที — DETAIL & BENEFIT: สาธิตสินค้าอย่างเป็นธรรมชาติ พร้อมแทรกบิวตี้ช็อตโฆษณาหนึ่งช็อต ขณะผู้รีวิวเล่ารายละเอียดสำคัญ ${moves[1]} ${transition}\n• ฉาก 4 — 7.4–10.0 วินาที — RECOMMENDATION & HERO: ผู้รีวิวคนเดิมสรุปคำแนะนำ แล้ว ${moves[2]} จบด้วยสินค้าเห็นครบในฮีโร่ช็อตพรีเมียมที่สะอาดตา`,
+        5: `• ฉาก 1 — 0.0–1.5 วินาที — STOP-SCROLL HOOK: เปิดทันทีด้วยรายละเอียดมาโครที่สะดุดตาของสินค้าจริงโดย ${moves[0]} ห้ามเฟดจากจอดำ เริ่มเสียงพูดไทยอย่างเป็นธรรมชาติภายใน 0.3 วินาที\n• ฉาก 2 — 1.5–3.2 วินาที — REVIEWER INTRO: เผยผู้รีวิวในฉาก Korean minimal ครีม–เบจอบอุ่น ถือสินค้าอย่างเป็นธรรมชาติและพูดชื่อสินค้า\n• ฉาก 3 — 3.2–5.2 วินาที — PRODUCT DEMO: สาธิตหรือนำเสนอสินค้าอย่างเรียบง่ายและถูกต้องตามกายภาพ รักษาผู้รีวิว เสื้อผ้า มือ และสินค้าให้เหมือนเดิมทั้งหมด\n• ฉาก 4 — 5.2–7.6 วินาที — BENEFIT DETAIL: ${moves[1]} พร้อมบิวตี้ช็อตโฆษณาคมชัดหนึ่งช็อต เพื่อสื่อเฉพาะรายละเอียดสินค้าที่ให้ไว้ ${transition}\n• ฉาก 5 — 7.6–10.0 วินาที — RECOMMENDATION & HERO: ผู้รีวิวคนเดิมแนะนำสินค้าอย่างอบอุ่น แล้ว ${moves[2]} จบด้วยฮีโร่ช็อตสะอาด สินค้าอยู่กลางเฟรม เห็นครบ คมชัด และไม่มีสิ่งบัง`
+      };
+      return plans[v.sceneCount];
+    }
+
+    function generateEnglish(v) {
+      const s = styleData[v.style];
+      const moves = cameraData[v.camera].en;
+      const reviewer = v.reviewer === 'woman'
+        ? 'one Thai woman reviewer, age 25–35, natural refined makeup, warm and trustworthy presence, wearing a modest cream or beige outfit'
+        : 'one Thai man reviewer, age 25–35, neat natural grooming, warm and trustworthy presence, wearing a refined cream or beige outfit';
+      const voice = v.reviewer === 'woman' ? 'natural warm Thai female voice' : 'natural warm Thai male voice';
+      const textDirection = v.textMode === 'headline' && v.selling
+        ? `At 7.5 seconds, show one clean, readable text overlay exactly as written: “${v.selling}”. Do not add any other text.`
+        : 'Do not generate any on-screen text, captions, logos, watermarks, UI, or subtitles.';
+      const selling = v.selling ? `\nCORE MESSAGE / SELLING POINT:\n${v.selling}\n` : '';
+      const transition = transitionsEn[variation % transitionsEn.length];
+      const voiceDirection = v.voiceScript
+        ? `Speak this exact Thai script verbatim, with clear pronunciation and natural commercial pacing: “${v.voiceScript}”`
+        : `Create and perform one concise Thai review script of about 22–28 Thai words. It must say the exact product name and summarize only the supplied product details and selling point. Do not invent benefits, ingredients, guarantees, prices, or claims. Use the line as spoken audio, not as on-screen text.`;
+
+      return `Create exactly ONE continuous 10-second product review advertisement with exactly ${v.sceneCount} distinct scenes, using the attached product image as the primary visual reference.
+
+PRODUCT:
+Name: ${v.name}
+Description and key details: ${v.details}${selling}
+REFERENCE-IMAGE FIDELITY — CRITICAL:
+Preserve the exact product identity from the attached image: shape, proportions, packaging, label placement, logo, materials, colors, cap, surface finish, and all visible design details. The product must remain consistent in every frame. Do not redesign, deform, duplicate, open, or invent unseen parts of the product. Any readable packaging text must remain faithful to the reference; if exact reproduction is uncertain, keep it visually stable rather than generating new words.
+
+CREATIVE DIRECTION:
+Overall palette and setting: warm cream and beige tones, soft natural window light, photorealistic premium commercial product photography, Korean minimal aesthetic, cozy luxury, shallow depth of field, clean uncluttered interior, realistic materials and reflections, polished warm color grading, cinematic high dynamic range, extremely crisp 8K-quality detail. ${s.en}. ${s.lightEn}. Keep skin tones natural and the product color accurate.
+
+REVIEWER AND CONTINUITY:
+Feature ${reviewer}. Use the exact same person, face, hair, outfit, accessories, voice, and environment throughout every scene. The reviewer interacts naturally with the correctly scaled product. Anatomically correct hands and fingers. Friendly, confident micro-expressions; never exaggerated. When the reviewer is visibly speaking, use accurate natural Thai lip sync.
+
+THAI VOICE AND AUDIO:
+Use a ${voice}, recorded cleanly and close, with natural Thai pronunciation and a sincere review tone. ${voiceDirection} The spoken track must fit comfortably within 9 seconds, start by 0.3 seconds, and end before 9.5 seconds. Keep subtle cozy music and tasteful synchronized product sound design underneath; the voice must stay clear and dominant.
+
+SHOT PLAN — EXACTLY ${v.sceneCount} SCENES, TOTAL DURATION EXACTLY 10 SECONDS:
+${englishShotPlan(v, moves, transition)}
+
+FORMAT AND OUTPUT:
+• Aspect ratio: ${v.ratio}.
+• Duration: exactly 10 seconds, not shorter or longer.
+• Exactly ${v.sceneCount} clearly distinct scenes inside one coherent video, joined by clean seamless transitions.
+• Premium photorealistic 8K-quality advertising finish, warm cream-beige palette, natural light, Korean minimal cozy-luxury look, shallow depth of field.
+• One continuous Thai review voice performed by the selected reviewer gender, synchronized with the scene timing.
+• ${textDirection}
+
+AVOID:
+Changing reviewer identity, face drift, wardrobe changes, gender changes, robotic voice, incorrect Thai pronunciation, lip-sync mismatch, product morphing, warped or changing packaging, incorrect colors, altered labels, extra products, duplicate objects, floating parts, hands with anatomy errors, flicker, jitter, sudden camera shake, harsh jump cuts, low resolution, blur on the hero product, cluttered backgrounds, cool blue color casts, fake claims, unreadable typography, borders, letterboxing, watermarks, or end cards that hide the product.`;
+    }
+
+    function generateThai(v) {
+      const s = styleData[v.style];
+      const moves = cameraData[v.camera].th;
+      const reviewer = v.reviewer === 'woman'
+        ? 'ผู้รีวิวหญิงไทย 1 คน อายุประมาณ 25–35 ปี แต่งหน้าธรรมชาติอย่างประณีต บุคลิกอบอุ่นน่าเชื่อถือ สวมเสื้อผ้าสุภาพสีครีมหรือเบจ'
+        : 'ผู้รีวิวชายไทย 1 คน อายุประมาณ 25–35 ปี ดูแลตัวเองเรียบร้อยเป็นธรรมชาติ บุคลิกอบอุ่นน่าเชื่อถือ สวมเสื้อผ้าสุภาพสีครีมหรือเบจ';
+      const voice = v.reviewer === 'woman' ? 'เสียงผู้หญิงไทยโทนอุ่นเป็นธรรมชาติ' : 'เสียงผู้ชายไทยโทนอุ่นเป็นธรรมชาติ';
+      const textDirection = v.textMode === 'headline' && v.selling
+        ? `ที่เวลา 7.5 วินาที ให้แสดงข้อความอ่านง่ายเพียงหนึ่งบรรทัดตามนี้ทุกตัวอักษร: “${v.selling}” ห้ามเพิ่มข้อความอื่น`
+        : 'ห้ามสร้างตัวอักษรบนจอ คำบรรยาย โลโก้เพิ่มเติม ลายน้ำ หน้าตาแอป หรือซับไตเติล';
+      const selling = v.selling ? `\nข้อความหลัก / จุดขาย:\n${v.selling}\n` : '';
+      const transition = transitionsTh[variation % transitionsTh.length];
+      const voiceDirection = v.voiceScript
+        ? `พูดสคริปต์ภาษาไทยนี้ตามตัวอักษรทุกคำ ด้วยการออกเสียงชัดเจนและจังหวะโฆษณาที่เป็นธรรมชาติ: “${v.voiceScript}”`
+        : `เขียนและพูดบทรีวิวภาษาไทยสั้นกระชับประมาณ 22–28 คำ ต้องพูดชื่อสินค้าให้ตรงและสรุปจากรายละเอียดกับจุดขายที่ให้ไว้เท่านั้น ห้ามสร้างสรรพคุณ ส่วนผสม การรับประกัน ราคา หรือคำกล่าวอ้างเพิ่ม ใช้ประโยคนี้เป็นเสียงพูด ห้ามทำเป็นข้อความบนจอ`;
+
+      return `สร้างวิดีโอโฆษณารีวิวสินค้า 1 วิดีโอ ความยาว 10 วินาทีพอดี มี ${v.sceneCount} ฉากที่แตกต่างกันอย่างชัดเจน โดยใช้รูปสินค้าที่แนบเป็นภาพอ้างอิงหลัก
+
+สินค้า:
+ชื่อ: ${v.name}
+รายละเอียดและจุดเด่น: ${v.details}${selling}
+ความถูกต้องตามภาพอ้างอิง — สำคัญมาก:
+รักษาตัวตนของสินค้าให้ตรงกับรูปที่แนบทุกประการ ทั้งรูปทรง สัดส่วน บรรจุภัณฑ์ ตำแหน่งฉลาก โลโก้ วัสดุ สี ฝา พื้นผิว และรายละเอียดที่มองเห็น สินค้าต้องเหมือนเดิมทุกเฟรม ห้ามออกแบบใหม่ บิดเบี้ยว ทำซ้ำ เปิดสินค้า หรือสร้างส่วนที่มองไม่เห็นขึ้นมาเอง ข้อความบนบรรจุภัณฑ์ที่อ่านได้ต้องตรงกับรูป หากทำซ้ำให้ตรงไม่ได้ ให้คงภาพฉลากไว้อย่างเสถียรแทนการสร้างคำใหม่
+
+ทิศทางงานภาพ:
+ใช้โทนครีม–เบจอบอุ่น แสงธรรมชาติอ่อนจากหน้าต่าง ภาพสมจริงระดับโฆษณาพรีเมียมแบบ commercial product photography, Korean minimal aesthetic, cozy luxury, shallow depth of field, ฉากอินทีเรียร์สะอาดไม่รก วัสดุและเงาสะท้อนสมจริง เกรดสีอุ่นแบบภาพยนตร์ ช่วงไดนามิกสูง รายละเอียดคมชัดระดับ 8K ${s.th} ${s.lightTh} รักษาสีผิวให้เป็นธรรมชาติและสีสินค้าให้ตรงกับภาพจริง
+
+ผู้รีวิวและความต่อเนื่อง:
+ใช้${reviewer} ต้องเป็นคนเดิม ใบหน้าเดิม ทรงผมเดิม เสื้อผ้าเดิม เครื่องประดับเดิม เสียงเดิม และฉากเดิมตลอดทุกฉาก ผู้รีวิวจับหรือใช้สินค้าที่มีขนาดถูกต้องอย่างเป็นธรรมชาติ มือและนิ้วถูกต้องตามกายวิภาค สีหน้าเป็นมิตร มั่นใจ และไม่เล่นใหญ่ เมื่อเห็นผู้รีวิวพูด ต้องขยับปากตรงกับเสียงภาษาไทยอย่างเป็นธรรมชาติ
+
+เสียงพูดภาษาไทยและเสียงประกอบ:
+ใช้${voice} บันทึกเสียงสะอาดและใกล้ ออกเสียงภาษาไทยเป็นธรรมชาติ น้ำเสียงรีวิวจริงใจ ${voiceDirection} เสียงพูดต้องพอดีภายใน 9 วินาที เริ่มภายใน 0.3 วินาทีและจบก่อน 9.5 วินาที ใช้ดนตรี cozy เบา ๆ และซาวด์ดีไซน์สินค้าที่เข้าจังหวะอยู่ด้านหลัง โดยให้เสียงพูดชัดและเด่นกว่าเสมอ
+
+ลำดับช็อต — ${v.sceneCount} ฉากพอดี ความยาวรวมต้องเท่ากับ 10 วินาทีพอดี:
+${thaiShotPlan(v, moves, transition)}
+
+รูปแบบและผลลัพธ์:
+• สัดส่วนภาพ: ${v.ratio}
+• ความยาว: 10 วินาทีพอดี ห้ามสั้นหรือยาวกว่านี้
+• มี ${v.sceneCount} ฉากที่แตกต่างชัดเจนภายในวิดีโอเดียว เชื่อมด้วยทรานซิชันที่สะอาดและแนบเนียน
+• ภาพสมจริงระดับโฆษณาพรีเมียมคมชัดแบบ 8K โทนครีม–เบจ แสงธรรมชาติ สไตล์ Korean minimal และ cozy luxury พร้อมระยะชัดตื้น
+• มีเสียงรีวิวภาษาไทยต่อเนื่องหนึ่งเสียงตามเพศผู้รีวิว และเสียงต้องตรงกับเวลาของแต่ละฉาก
+• ${textDirection}
+
+ข้อห้าม:
+ตัวตนผู้รีวิวเปลี่ยน ใบหน้าไหล เสื้อผ้าเปลี่ยน เพศเปลี่ยน เสียงหุ่นยนต์ ออกเสียงไทยผิด ปากไม่ตรงเสียง สินค้ากลายรูป บรรจุภัณฑ์บิดเบี้ยวหรือเปลี่ยนไป สีผิด ฉลากเปลี่ยน มีสินค้าเกินหรือซ้ำชิ้น วัตถุลอย ชิ้นส่วนเกิน มือผิดสรีระ ภาพกะพริบ ภาพสั่น กล้องสะบัด คัตกระโดดแรง ความละเอียดต่ำ สินค้าหลักเบลอ ฉากรก โทนสีฟ้าเย็น คำกล่าวอ้างเกินจริง ตัวอักษรอ่านไม่ได้ ขอบดำ ลายน้ำ หรือเอนด์การ์ดที่บังสินค้า`;
+    }
+
+    function generatePrompt(scroll = true) {
+      const v = formValues();
+      const missing = [];
+      if (!imageName) missing.push('รูปสินค้า');
+      if (!v.name) missing.push('ชื่อสินค้า');
+      if (!v.details) missing.push('รายละเอียดสินค้า');
+
+      if (missing.length) {
+        showError(`กรุณาเพิ่ม ${missing.join(', ')} ก่อนสร้าง Prompt`);
+        const target = !imageName ? uploadZone : !v.name ? $('productName') : $('productDetails');
+        target.focus();
+        return false;
+      }
+
+      errorBox.classList.remove('show');
+      promptOutput.value = v.language === 'en' ? generateEnglish(v) : generateThai(v);
+      $('ratioTag').textContent = v.ratio;
+      $('sceneTag').textContent = `${v.sceneCount} scenes`;
+      $('langTag').textContent = v.language === 'en' ? 'English' : 'ภาษาไทย';
+      promptEmpty.style.display = 'none';
+      promptResult.style.display = 'block';
+      $('copyLabel').textContent = 'คัดลอก Prompt ไปใช้ใน Gemini';
+      $('copyBtn').classList.remove('copied');
+
+      if (scroll && window.innerWidth < 981) {
+        $('outputCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+      return true;
+    }
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      variation = 0;
+      generatePrompt();
+    });
+
+    $('regenerateBtn').addEventListener('click', () => {
+      variation += 1;
+      if (generatePrompt(false)) showToast('สร้างเวอร์ชันใหม่แล้ว');
+    });
+
+    async function writePromptToClipboard() {
+      const text = promptOutput.value;
+      if (!text) return false;
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch (_) {
+        promptOutput.focus();
+        promptOutput.select();
+        const copied = document.execCommand('copy');
+        if (!copied) return false;
+      }
+      return true;
+    }
+
+    async function copyPrompt() {
+      const copied = await writePromptToClipboard();
+      if (!copied) return showToast('คัดลอกไม่สำเร็จ กรุณาเลือกข้อความแล้วกด Ctrl+C');
+      $('copyLabel').textContent = 'คัดลอกแล้ว — พร้อมวางใน Gemini';
+      $('copyBtn').classList.add('copied');
+      showToast('คัดลอก Prompt แล้ว');
+      setTimeout(() => {
+        $('copyLabel').textContent = 'คัดลอก Prompt ไปใช้ใน Gemini';
+        $('copyBtn').classList.remove('copied');
+      }, 3000);
+    }
+
+    $('copyBtn').addEventListener('click', copyPrompt);
+
+    $('clearBtn').addEventListener('click', () => {
+      form.reset();
+      removeImage();
+      promptOutput.value = '';
+      promptResult.style.display = 'none';
+      promptEmpty.style.display = 'grid';
+      errorBox.classList.remove('show');
+      variation = 0;
+      voiceVariation = 0;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      showToast('ล้างข้อมูลแล้ว');
+    });
+  </script>
+</body>
+</html>
