@@ -1406,13 +1406,13 @@
         : 'one Thai man reviewer, age 25–35, neat natural grooming, warm and trustworthy presence, wearing a refined cream or beige outfit';
       const voice = v.reviewer === 'woman' ? 'natural warm Thai female voice' : 'natural warm Thai male voice';
       const textDirection = v.textMode === 'headline' && v.selling
-        ? `At 7.5 seconds, show one clean, readable text overlay exactly as written: “${v.selling}”. Do not add any other text.`
+        ? `At 7.5 seconds, show one clean, static Thai text overlay using this exact Unicode character sequence: “${v.selling}”. Copy every Thai consonant, vowel, tone mark, space, numeral, and punctuation mark exactly; do not translate, paraphrase, respell, split, animate, morph, or add any text. Keep all glyphs stable and fully legible in every frame. If exact Thai typography cannot be reproduced, omit the overlay entirely rather than showing misspelled or invented Thai.`
         : 'Do not generate any on-screen text, captions, logos, watermarks, UI, or subtitles.';
       const selling = v.selling ? `\nCORE MESSAGE / SELLING POINT:\n${v.selling}\n` : '';
       const transition = transitionsEn[variation % transitionsEn.length];
       const voiceDirection = v.voiceScript
-        ? `Speak this exact Thai script verbatim, with clear pronunciation and natural commercial pacing: “${v.voiceScript}”`
-        : `Create and perform one concise Thai review script of about 22–28 Thai words. It must say the exact product name and summarize only the supplied product details and selling point. Do not invent benefits, ingredients, guarantees, prices, or claims. Use the line as spoken audio, not as on-screen text.`;
+        ? `Treat the following Thai script as a LOCKED phonetic transcript and speak it verbatim, word for word, without translating, paraphrasing, omitting, repeating, or adding words: “${v.voiceScript}”`
+        : `Create and perform one concise Thai review script of about 18–22 Thai words. It must say the exact product name and summarize only the supplied product details and selling point. Do not invent benefits, ingredients, guarantees, prices, or claims. Use the line as spoken audio, not as on-screen text.`;
 
       return `Create exactly ONE continuous 10-second product review advertisement with exactly ${v.sceneCount} distinct scenes, using the attached product image as the primary visual reference.
 
@@ -1429,7 +1429,7 @@ REVIEWER AND CONTINUITY:
 Feature ${reviewer}. Use the exact same person, face, hair, outfit, accessories, voice, and environment throughout every scene. The reviewer interacts naturally with the correctly scaled product. Anatomically correct hands and fingers. Friendly, confident micro-expressions; never exaggerated. When the reviewer is visibly speaking, use accurate natural Thai lip sync.
 
 THAI VOICE AND AUDIO:
-Use a ${voice}, recorded cleanly and close, with natural Thai pronunciation and a sincere review tone. ${voiceDirection} The spoken track must fit comfortably within 9 seconds, start by 0.3 seconds, and end before 9.5 seconds. Keep subtle cozy music and tasteful synchronized product sound design underneath; the voice must stay clear and dominant.
+Use a ${voice}, recorded cleanly and close, with a sincere review tone. ${voiceDirection} Thai-language accuracy is the TOP PRIORITY: use a native Central Thai speaker; pronounce every syllable distinctly with correct Thai consonants, consonant clusters, vowel length, final consonants, and all five lexical tones. Preserve natural Thai phrase boundaries and polite particles. Keep one consistent human voice with no accent drift, slurring, mumbling, stuttering, doubled syllables, skipped words, garbled sounds, pseudo-Thai, overlapping speech, chorus, or robotic artifacts. Pronounce the product name exactly as written. Use a calm, natural pace with brief pauses between phrases; never speed up the last words. The spoken track must fit comfortably within 9 seconds, start by 0.3 seconds, and end before 9.5 seconds. Keep subtle cozy music and tasteful synchronized product sound design underneath at a clearly lower volume; never mask consonants or word endings. The voice must stay dry, centered, clear, and dominant.
 
 SHOT PLAN — EXACTLY ${v.sceneCount} SCENES, TOTAL DURATION EXACTLY 10 SECONDS:
 ${englishShotPlan(v, moves, transition)}
@@ -1443,7 +1443,7 @@ FORMAT AND OUTPUT:
 • ${textDirection}
 
 AVOID:
-Changing reviewer identity, face drift, wardrobe changes, gender changes, robotic voice, incorrect Thai pronunciation, lip-sync mismatch, product morphing, warped or changing packaging, incorrect colors, altered labels, extra products, duplicate objects, floating parts, hands with anatomy errors, flicker, jitter, sudden camera shake, harsh jump cuts, low resolution, blur on the hero product, cluttered backgrounds, cool blue color casts, fake claims, unreadable typography, borders, letterboxing, watermarks, or end cards that hide the product.`;
+Changing reviewer identity, face drift, wardrobe changes, gender changes, robotic voice, non-native Thai accent, incorrect Thai tones or vowel lengths, slurred or garbled Thai, invented Thai words, repeated or missing words, doubled syllables, rushed endings, voice overlap, lip-sync mismatch, misspelled or morphing Thai glyphs, product morphing, warped or changing packaging, incorrect colors, altered labels, extra products, duplicate objects, floating parts, hands with anatomy errors, flicker, jitter, sudden camera shake, harsh jump cuts, low resolution, blur on the hero product, cluttered backgrounds, cool blue color casts, fake claims, unreadable typography, borders, letterboxing, watermarks, or end cards that hide the product.`;
     }
 
     function generateThai(v) {
@@ -1454,13 +1454,13 @@ Changing reviewer identity, face drift, wardrobe changes, gender changes, roboti
         : 'ผู้รีวิวชายไทย 1 คน อายุประมาณ 25–35 ปี ดูแลตัวเองเรียบร้อยเป็นธรรมชาติ บุคลิกอบอุ่นน่าเชื่อถือ สวมเสื้อผ้าสุภาพสีครีมหรือเบจ';
       const voice = v.reviewer === 'woman' ? 'เสียงผู้หญิงไทยโทนอุ่นเป็นธรรมชาติ' : 'เสียงผู้ชายไทยโทนอุ่นเป็นธรรมชาติ';
       const textDirection = v.textMode === 'headline' && v.selling
-        ? `ที่เวลา 7.5 วินาที ให้แสดงข้อความอ่านง่ายเพียงหนึ่งบรรทัดตามนี้ทุกตัวอักษร: “${v.selling}” ห้ามเพิ่มข้อความอื่น`
+        ? `ที่เวลา 7.5 วินาที ให้แสดงข้อความภาษาไทยแบบนิ่งเพียงหนึ่งบรรทัด โดยคัดลอกลำดับอักขระ Unicode นี้ทุกตัวอักษร: “${v.selling}” ต้องรักษาพยัญชนะ สระ วรรณยุกต์ ช่องว่าง ตัวเลข และเครื่องหมายทุกตำแหน่งให้ตรง ห้ามแปล เรียบเรียงใหม่ สะกดใหม่ แยกคำ ทำตัวอักษรเคลื่อนไหว บิดรูป หรือเพิ่มข้อความอื่น ตัวอักษรต้องคงที่และอ่านชัดทุกเฟรม หากสร้างภาษาไทยให้ตรงทุกตัวอักษรไม่ได้ ให้ไม่แสดงข้อความเลยแทนการแสดงคำผิดหรือคำที่แต่งขึ้น`
         : 'ห้ามสร้างตัวอักษรบนจอ คำบรรยาย โลโก้เพิ่มเติม ลายน้ำ หน้าตาแอป หรือซับไตเติล';
       const selling = v.selling ? `\nข้อความหลัก / จุดขาย:\n${v.selling}\n` : '';
       const transition = transitionsTh[variation % transitionsTh.length];
       const voiceDirection = v.voiceScript
-        ? `พูดสคริปต์ภาษาไทยนี้ตามตัวอักษรทุกคำ ด้วยการออกเสียงชัดเจนและจังหวะโฆษณาที่เป็นธรรมชาติ: “${v.voiceScript}”`
-        : `เขียนและพูดบทรีวิวภาษาไทยสั้นกระชับประมาณ 22–28 คำ ต้องพูดชื่อสินค้าให้ตรงและสรุปจากรายละเอียดกับจุดขายที่ให้ไว้เท่านั้น ห้ามสร้างสรรพคุณ ส่วนผสม การรับประกัน ราคา หรือคำกล่าวอ้างเพิ่ม ใช้ประโยคนี้เป็นเสียงพูด ห้ามทำเป็นข้อความบนจอ`;
+        ? `ถือสคริปต์ต่อไปนี้เป็นบทถอดเสียงที่ล็อกไว้ และพูดตามทุกคำแบบคำต่อคำ ห้ามแปล เรียบเรียงใหม่ ตัดคำ พูดซ้ำ หรือเพิ่มคำ: “${v.voiceScript}”`
+        : `เขียนและพูดบทรีวิวภาษาไทยสั้นกระชับประมาณ 18–22 คำ ต้องพูดชื่อสินค้าให้ตรงและสรุปจากรายละเอียดกับจุดขายที่ให้ไว้เท่านั้น ห้ามสร้างสรรพคุณ ส่วนผสม การรับประกัน ราคา หรือคำกล่าวอ้างเพิ่ม ใช้ประโยคนี้เป็นเสียงพูด ห้ามทำเป็นข้อความบนจอ`;
 
       return `สร้างวิดีโอโฆษณารีวิวสินค้า 1 วิดีโอ ความยาว 10 วินาทีพอดี มี ${v.sceneCount} ฉากที่แตกต่างกันอย่างชัดเจน โดยใช้รูปสินค้าที่แนบเป็นภาพอ้างอิงหลัก
 
@@ -1477,7 +1477,7 @@ Changing reviewer identity, face drift, wardrobe changes, gender changes, roboti
 ใช้${reviewer} ต้องเป็นคนเดิม ใบหน้าเดิม ทรงผมเดิม เสื้อผ้าเดิม เครื่องประดับเดิม เสียงเดิม และฉากเดิมตลอดทุกฉาก ผู้รีวิวจับหรือใช้สินค้าที่มีขนาดถูกต้องอย่างเป็นธรรมชาติ มือและนิ้วถูกต้องตามกายวิภาค สีหน้าเป็นมิตร มั่นใจ และไม่เล่นใหญ่ เมื่อเห็นผู้รีวิวพูด ต้องขยับปากตรงกับเสียงภาษาไทยอย่างเป็นธรรมชาติ
 
 เสียงพูดภาษาไทยและเสียงประกอบ:
-ใช้${voice} บันทึกเสียงสะอาดและใกล้ ออกเสียงภาษาไทยเป็นธรรมชาติ น้ำเสียงรีวิวจริงใจ ${voiceDirection} เสียงพูดต้องพอดีภายใน 9 วินาที เริ่มภายใน 0.3 วินาทีและจบก่อน 9.5 วินาที ใช้ดนตรี cozy เบา ๆ และซาวด์ดีไซน์สินค้าที่เข้าจังหวะอยู่ด้านหลัง โดยให้เสียงพูดชัดและเด่นกว่าเสมอ
+ใช้${voice} บันทึกเสียงสะอาดและใกล้ น้ำเสียงรีวิวจริงใจ ${voiceDirection} ให้ความถูกต้องของภาษาไทยเป็นความสำคัญสูงสุด ใช้เสียงเจ้าของภาษาไทยกลาง ออกเสียงทุกพยางค์ชัดเจน พยัญชนะ อักษรควบ ความสั้น–ยาวของสระ ตัวสะกด และวรรณยุกต์ทั้ง 5 เสียงต้องถูกต้อง รักษาการแบ่งวลีและคำลงท้ายสุภาพอย่างเป็นธรรมชาติ ใช้เสียงมนุษย์คนเดียวให้คงที่ ห้ามสำเนียงไหล เสียงอ้อแอ้ กลืนคำ ติดอ่าง พยางค์ซ้ำ คำหาย เสียงมั่วคล้ายภาษาไทย เสียงพูดซ้อน เสียงประสาน หรือเสียงหุ่นยนต์ ชื่อสินค้าต้องออกเสียงตรงตามที่เขียน พูดด้วยจังหวะสงบเป็นธรรมชาติและเว้นช่วงสั้น ๆ ระหว่างวลี ห้ามเร่งคำช่วงท้าย เสียงพูดต้องพอดีภายใน 9 วินาที เริ่มภายใน 0.3 วินาทีและจบก่อน 9.5 วินาที ใช้ดนตรี cozy และซาวด์ดีไซน์เบากว่าเสียงพูดอย่างชัดเจน ห้ามกลบพยัญชนะหรือตัวสะกด เสียงพูดต้องแห้ง อยู่กึ่งกลาง ชัด และเด่นที่สุด
 
 ลำดับช็อต — ${v.sceneCount} ฉากพอดี ความยาวรวมต้องเท่ากับ 10 วินาทีพอดี:
 ${thaiShotPlan(v, moves, transition)}
@@ -1491,7 +1491,7 @@ ${thaiShotPlan(v, moves, transition)}
 • ${textDirection}
 
 ข้อห้าม:
-ตัวตนผู้รีวิวเปลี่ยน ใบหน้าไหล เสื้อผ้าเปลี่ยน เพศเปลี่ยน เสียงหุ่นยนต์ ออกเสียงไทยผิด ปากไม่ตรงเสียง สินค้ากลายรูป บรรจุภัณฑ์บิดเบี้ยวหรือเปลี่ยนไป สีผิด ฉลากเปลี่ยน มีสินค้าเกินหรือซ้ำชิ้น วัตถุลอย ชิ้นส่วนเกิน มือผิดสรีระ ภาพกะพริบ ภาพสั่น กล้องสะบัด คัตกระโดดแรง ความละเอียดต่ำ สินค้าหลักเบลอ ฉากรก โทนสีฟ้าเย็น คำกล่าวอ้างเกินจริง ตัวอักษรอ่านไม่ได้ ขอบดำ ลายน้ำ หรือเอนด์การ์ดที่บังสินค้า`;
+ตัวตนผู้รีวิวเปลี่ยน ใบหน้าไหล เสื้อผ้าเปลี่ยน เพศเปลี่ยน เสียงหุ่นยนต์ สำเนียงไทยไม่เป็นธรรมชาติ วรรณยุกต์หรือความสั้น–ยาวของสระผิด เสียงไทยอ้อแอ้หรือมั่ว มีคำแต่งใหม่ คำซ้ำ คำหาย พยางค์ซ้ำ คำท้ายถูกเร่ง เสียงพูดซ้อน ปากไม่ตรงเสียง ตัวอักษรไทยสะกดผิดหรือเปลี่ยนรูประหว่างเฟรม สินค้ากลายรูป บรรจุภัณฑ์บิดเบี้ยวหรือเปลี่ยนไป สีผิด ฉลากเปลี่ยน มีสินค้าเกินหรือซ้ำชิ้น วัตถุลอย ชิ้นส่วนเกิน มือผิดสรีระ ภาพกะพริบ ภาพสั่น กล้องสะบัด คัตกระโดดแรง ความละเอียดต่ำ สินค้าหลักเบลอ ฉากรก โทนสีฟ้าเย็น คำกล่าวอ้างเกินจริง ตัวอักษรอ่านไม่ได้ ขอบดำ ลายน้ำ หรือเอนด์การ์ดที่บังสินค้า`;
     }
 
     function generatePrompt(scroll = true) {
