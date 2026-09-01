@@ -657,6 +657,58 @@
 
     .prompt-box:focus { box-shadow: 0 0 0 4px rgba(216,255,88,.28); }
 
+    .caption-section {
+      margin-top: 18px;
+      padding-top: 18px;
+      border-top: 1px solid var(--line);
+    }
+
+    .caption-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .caption-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0;
+      font-size: 13px;
+    }
+
+    .caption-title span {
+      color: var(--plum);
+      font-family: "DM Mono", monospace;
+      font-size: 10px;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+
+    .caption-box {
+      min-height: 165px;
+      resize: vertical;
+      font-size: 13px;
+      line-height: 1.75;
+    }
+
+    .copy-caption {
+      min-height: 42px;
+      padding: 0 14px;
+      border: 1px solid var(--ink);
+      border-radius: 11px;
+      color: var(--ink);
+      background: var(--acid);
+      font-size: 11px;
+      font-weight: 800;
+      transition: background .2s, transform .2s;
+    }
+
+    .copy-caption:hover { background: #e3ff82; transform: translateY(-1px); }
+    .copy-caption.copied { background: #bfeec5; }
+
     .copy-main {
       width: 100%;
       min-height: 54px;
@@ -836,6 +888,7 @@
 
     html[data-theme="dark"] .film-frame { color: #17201b; }
     html[data-theme="dark"] .copy-main { color: #17201b; }
+    html[data-theme="dark"] .copy-caption { color: #17201b; }
     html[data-theme="dark"] .open-gemini { color: var(--plum); }
     html[data-theme="dark"] .open-gemini:hover { color: #17201b; background: var(--plum); }
 
@@ -892,6 +945,9 @@
       .result-meta { gap: 5px; }
       .tag { min-height: 26px; padding: 0 8px; font-size: 8px; }
       .prompt-box { height: 54vh; min-height: 390px; max-height: 540px; padding: 15px; font-size: 13px; line-height: 1.7; }
+      .caption-box { min-height: 180px; }
+      .caption-head { align-items: flex-start; }
+      .copy-caption { min-height: 40px; padding: 0 11px; }
       .result-actions { grid-template-columns: 1fr; }
       .copy-main, .open-gemini { min-height: 52px; }
       .gemini-tip { font-size: 10px; }
@@ -935,11 +991,11 @@
         <h1>เปลี่ยนรูปสินค้า<br>เป็นวิดีโอ <span class="highlight">10 วินาที</span></h1>
       </div>
       <div>
-        <p class="hero-note">สร้างวิดีโอรีวิว 3–5 ฉาก พร้อมผู้รีวิวชายหรือหญิงและเสียงพากย์ภาษาไทย ระบบจะเรียบเรียงลำดับฉาก การเคลื่อนกล้อง แสง และข้อห้ามให้พร้อมใช้ใน Gemini</p>
+        <p class="hero-note">สร้างวิดีโอรีวิว 3–5 ฉาก พร้อมผู้รีวิวชายหรือหญิงและเสียงพากย์ภาษาไทย ระบบจะเรียบเรียง Prompt พร้อมแคปชั่นและแฮชแท็กให้นำไปโพสต์ได้ทันที</p>
         <div class="step-row" aria-label="ขั้นตอนใช้งาน">
           <span class="mini-step"><b>01</b> แนบรูป</span><span class="step-arrow">→</span>
           <span class="mini-step"><b>02</b> ใส่รายละเอียด</span><span class="step-arrow">→</span>
-          <span class="mini-step"><b>03</b> Copy prompt</span>
+          <span class="mini-step"><b>03</b> Copy & post</span>
         </div>
       </div>
     </section>
@@ -1081,7 +1137,7 @@
             <div id="formError" class="error" role="alert"></div>
 
             <button class="generate" type="submit">
-              <span>สร้าง Prompt 10 วินาที</span><span class="generate-arrow" aria-hidden="true">↗</span>
+              <span>สร้าง Prompt + แคปชั่นโพสต์</span><span class="generate-arrow" aria-hidden="true">↗</span>
             </button>
           </form>
         </div>
@@ -1089,7 +1145,7 @@
 
       <article id="outputCard" class="card output-card">
         <div class="card-head">
-          <h2 class="card-title"><span class="num">02</span> Prompt พร้อมใช้</h2>
+          <h2 class="card-title"><span class="num">02</span> Prompt + แคปชั่นพร้อมใช้</h2>
           <span class="card-kicker">Output</span>
         </div>
 
@@ -1099,8 +1155,8 @@
               <div class="film-frame">▶</div>
               <div class="spark">✦</div>
             </div>
-            <h3>พรอมป์ของคุณจะแสดงตรงนี้</h3>
-            <p>กรอกข้อมูลด้านซ้ายแล้วกดสร้าง ระบบจะจัดฉากครบ 0–10 วินาทีให้พร้อมคัดลอก</p>
+            <h3>Prompt และแคปชั่นจะแสดงตรงนี้</h3>
+            <p>กรอกข้อมูลด้านซ้ายแล้วกดสร้าง ระบบจะจัดฉากครบ 0–10 วินาที พร้อมเขียนแคปชั่นและแฮชแท็กสำหรับโพสต์</p>
           </div>
         </div>
 
@@ -1124,6 +1180,13 @@
             <a class="open-gemini" href="https://gemini.google.com/app" target="_blank" rel="noopener noreferrer"><span>เปิด Gemini</span><span aria-hidden="true">↗</span></a>
           </div>
           <div class="gemini-tip"><span aria-hidden="true">☝</span><span><strong>วิธีใช้:</strong> เปิด Gemini → เลือก Create video → Add image → แนบรูปสินค้าเดิม → วาง Prompt → ส่งสร้างวิดีโอ</span></div>
+          <section class="caption-section" aria-labelledby="captionTitle">
+            <div class="caption-head">
+              <h3 id="captionTitle" class="caption-title">แคปชั่นสำหรับโพสต์ <span>Caption + Hashtags</span></h3>
+              <button id="copyCaptionBtn" class="copy-caption" type="button">คัดลอกแคปชั่น</button>
+            </div>
+            <textarea id="captionOutput" class="caption-box" aria-label="แคปชั่นพร้อมแฮชแท็กที่สร้างแล้ว" spellcheck="true"></textarea>
+          </section>
         </div>
       </article>
     </section>
@@ -1164,6 +1227,7 @@
     const promptEmpty = $('promptEmpty');
     const promptResult = $('promptResult');
     const promptOutput = $('promptOutput');
+    const captionOutput = $('captionOutput');
     let imageName = '';
     let variation = 0;
     let voiceVariation = 0;
@@ -1494,6 +1558,52 @@ ${thaiShotPlan(v, moves, transition)}
 ตัวตนผู้รีวิวเปลี่ยน ใบหน้าไหล เสื้อผ้าเปลี่ยน เพศเปลี่ยน เสียงหุ่นยนต์ สำเนียงไทยไม่เป็นธรรมชาติ วรรณยุกต์หรือความสั้น–ยาวของสระผิด เสียงไทยอ้อแอ้หรือมั่ว มีคำแต่งใหม่ คำซ้ำ คำหาย พยางค์ซ้ำ คำท้ายถูกเร่ง เสียงพูดซ้อน ปากไม่ตรงเสียง ตัวอักษรไทยสะกดผิดหรือเปลี่ยนรูประหว่างเฟรม สินค้ากลายรูป บรรจุภัณฑ์บิดเบี้ยวหรือเปลี่ยนไป สีผิด ฉลากเปลี่ยน มีสินค้าเกินหรือซ้ำชิ้น วัตถุลอย ชิ้นส่วนเกิน มือผิดสรีระ ภาพกะพริบ ภาพสั่น กล้องสะบัด คัตกระโดดแรง ความละเอียดต่ำ สินค้าหลักเบลอ ฉากรก โทนสีฟ้าเย็น คำกล่าวอ้างเกินจริง ตัวอักษรอ่านไม่ได้ ขอบดำ ลายน้ำ หรือเอนด์การ์ดที่บังสินค้า`;
     }
 
+    function makeHashtag(text) {
+      try {
+        return text.normalize('NFC').replace(/[^\p{L}\p{M}\p{N}]+/gu, '').slice(0, 38);
+      } catch (_) {
+        return text.replace(/[^ก-๙a-zA-Z0-9]+/g, '').slice(0, 38);
+      }
+    }
+
+    function generateCaption(v) {
+      const shortDetails = compactSpeechSource(v.details, 18, 150);
+      const shortSelling = compactSpeechSource(v.selling, 10, 90);
+      const productTag = makeHashtag(v.name);
+      const hooks = [
+        `หยุดเลื่อนก่อน 👀 วันนี้มี ${v.name} มาให้ดูกัน`,
+        `ของดีที่อยากบอกต่อ ✨ มาทำความรู้จัก ${v.name} กัน`,
+        `ใครกำลังมองหาสินค้าแบบนี้ ต้องดู ${v.name} ไว้เลย`,
+        `เปิดกล่องความน่าสนใจของ ${v.name} ใน 10 วินาที 🎬`
+      ];
+      const callsToAction = [
+        'ดูคลิปให้จบ แล้วบอกกันหน่อยว่าจุดไหนน่าสนใจที่สุด 💬',
+        'สนใจลองดูรายละเอียดเพิ่มเติม แล้วเลือกให้เหมาะกับตัวเองนะ 🛍️',
+        'เซฟโพสต์นี้ไว้ดูภายหลัง และส่งต่อให้คนที่กำลังตามหาได้เลย 📌',
+        'ใครเคยใช้แล้ว มาแชร์ประสบการณ์กันในคอมเมนต์ได้เลย 💭'
+      ];
+      const styleTags = {
+        premium: ['รีวิวสินค้าพรีเมียม', 'ไอเทมน่าใช้'],
+        viral: ['ของดีบอกต่อ', 'ไอเทมไวรัล'],
+        minimal: ['ไอเทมมินิมอล', 'ของมันต้องมี'],
+        lifestyle: ['ไอเทมประจำวัน', 'รีวิวของใช้'],
+        beauty: ['บิวตี้ไอเทม', 'รีวิวบิวตี้'],
+        cinematic: ['รีวิวสินค้า', 'ไอเทมน่าสนใจ']
+      };
+      const tags = [
+        productTag,
+        ...(styleTags[v.style] || styleTags.cinematic),
+        'รีวิวสินค้า',
+        'ป้ายยา',
+        'TikTokShop'
+      ].filter(Boolean);
+      const uniqueTags = [...new Set(tags)].map(tag => `#${makeHashtag(tag)}`).join(' ');
+      const sellingLine = shortSelling ? `\nจุดเด่นที่อยากบอกต่อ: ${shortSelling}` : '';
+      const pick = variation % hooks.length;
+
+      return `${hooks[pick]}\n\n${shortDetails}${sellingLine}\n\n${callsToAction[pick]}\n\n${uniqueTags}`;
+    }
+
     function generatePrompt(scroll = true) {
       const v = formValues();
       const missing = [];
@@ -1510,6 +1620,7 @@ ${thaiShotPlan(v, moves, transition)}
 
       errorBox.classList.remove('show');
       promptOutput.value = v.language === 'en' ? generateEnglish(v) : generateThai(v);
+      captionOutput.value = generateCaption(v);
       $('ratioTag').textContent = v.ratio;
       $('sceneTag').textContent = `${v.sceneCount} scenes`;
       $('langTag').textContent = v.language === 'en' ? 'English' : 'ภาษาไทย';
@@ -1517,6 +1628,8 @@ ${thaiShotPlan(v, moves, transition)}
       promptResult.style.display = 'block';
       $('copyLabel').textContent = 'คัดลอก Prompt ไปใช้ใน Gemini';
       $('copyBtn').classList.remove('copied');
+      $('copyCaptionBtn').textContent = 'คัดลอกแคปชั่น';
+      $('copyCaptionBtn').classList.remove('copied');
 
       if (scroll && window.innerWidth < 981) {
         $('outputCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1563,10 +1676,34 @@ ${thaiShotPlan(v, moves, transition)}
 
     $('copyBtn').addEventListener('click', copyPrompt);
 
+    async function copyCaption() {
+      const text = captionOutput.value;
+      if (!text) return false;
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch (_) {
+        captionOutput.focus();
+        captionOutput.select();
+        const copied = document.execCommand('copy');
+        if (!copied) return showToast('คัดลอกไม่สำเร็จ กรุณาเลือกข้อความแล้วกด Ctrl+C');
+      }
+      $('copyCaptionBtn').textContent = 'คัดลอกแล้ว ✓';
+      $('copyCaptionBtn').classList.add('copied');
+      showToast('คัดลอกแคปชั่นพร้อมแฮชแท็กแล้ว');
+      setTimeout(() => {
+        $('copyCaptionBtn').textContent = 'คัดลอกแคปชั่น';
+        $('copyCaptionBtn').classList.remove('copied');
+      }, 3000);
+      return true;
+    }
+
+    $('copyCaptionBtn').addEventListener('click', copyCaption);
+
     $('clearBtn').addEventListener('click', () => {
       form.reset();
       removeImage();
       promptOutput.value = '';
+      captionOutput.value = '';
       promptResult.style.display = 'none';
       promptEmpty.style.display = 'grid';
       errorBox.classList.remove('show');
